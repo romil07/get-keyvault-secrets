@@ -4,6 +4,8 @@ import { IAuthorizationHandler } from "azure-actions-webclient/lib/AuthHandler/I
 import { ApiResult, ServiceClient, ApiCallback, ToError } from "azure-actions-webclient/lib/AzureRestClient";
 import { WebRequest, WebResponse } from "azure-actions-webclient/lib/webClient"
 import { AzureKeyVaultSecret } from "./KeyVaultHelper";
+import { KeyVaultDNSHelper } from './KeyVaultDNSHelper';
+import * as io from "@actions/io";
 
 export class KeyVaultClient extends ServiceClient {    
     private keyVaultUrl: string;
@@ -13,9 +15,16 @@ export class KeyVaultClient extends ServiceClient {
     constructor(endpoint: IAuthorizationHandler, timeOut: number, keyVaultUrl: string) {
         super(endpoint, timeOut);
         this.keyVaultUrl = keyVaultUrl;
+        console.log("Url: " + this.keyVaultUrl);
     }
 
     public async invokeRequest(request: WebRequest): Promise<WebResponse> {
+        KeyVaultDNSHelper.getBaseUrl().then(dnsSuffix => {
+            this.tokenArgs[1] = "https://" + dnsSuffix.substring(1);
+            console.log("vault dns: " + "https://" + dnsSuffix.substring(1));
+            console.log("arg1: " + this.tokenArgs[0]);
+            console.log("arg2: " + this.tokenArgs[1]);
+        });
         try {
             var response = await this.beginRequest(request, this.tokenArgs);
             return response;

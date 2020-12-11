@@ -10,8 +10,8 @@
   "author": "Romil Goyal",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^12.7.8",
-    "typescript": "^3.6.3"
+    "@types/node": "^12.19.8",
+    "typescript": "^3.9.7"
   },
   "dependencies": {
     "@actions/core": "1.2.6",

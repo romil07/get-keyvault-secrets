@@ -1,5 +1,6 @@
 import util = require("util");
 import * as core from '@actions/core';
+import { KeyVaultDNSHelper } from './KeyVaultDNSHelper';
 
 export class KeyVaultActionParameters {
 
@@ -7,7 +8,7 @@ export class KeyVaultActionParameters {
     public secretsFilter: string;
     public keyVaultUrl: string;
 
-    public getKeyVaultActionParameters() : KeyVaultActionParameters {
+    public async getKeyVaultActionParameters() : Promise<KeyVaultActionParameters> {
         this.keyVaultName = core.getInput("keyvault");
         this.secretsFilter = core.getInput("secrets");
 
@@ -20,7 +21,11 @@ export class KeyVaultActionParameters {
         }
 
         var azureKeyVaultDnsSuffix = "vault.azure.net";
+        await KeyVaultDNSHelper.getBaseUrl().then(dnsSuffix => {
+            azureKeyVaultDnsSuffix = dnsSuffix.substring(1);
+            console.log("checkpoint1: " + azureKeyVaultDnsSuffix);
+        });
         this.keyVaultUrl = util.format("https://%s.%s", this.keyVaultName, azureKeyVaultDnsSuffix);
-        return this;
+        return Promise.resolve(this);
     }
 }
