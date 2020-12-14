@@ -11,7 +11,7 @@ jobs:
     - uses: azure/login@releases/azcloud-v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS_US }}
-        environment: 'AzureChinaCloud' 
+        environment: 'AzureUSGovernment' 
     - uses: romil07/get-keyvault-secrets@master
       with:
         keyvault: "rogoyalkv"
