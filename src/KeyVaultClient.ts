@@ -1,30 +1,30 @@
 import * as core from '@actions/core';
 import util = require("util");
-import { IAuthorizationHandler } from "azure-actions-webclient/lib/AuthHandler/IAuthorizationHandler";
-import { ApiResult, ServiceClient, ApiCallback, ToError } from "azure-actions-webclient/lib/AzureRestClient";
-import { WebRequest, WebResponse } from "azure-actions-webclient/lib/webClient"
+//import { IAuthorizationHandler } from "azure-actions-webclient/lib/AuthHandler/IAuthorizationHandler";
+//import { ApiResult, ServiceClient, ApiCallback, ToError } from "azure-actions-webclient/lib/AzureRestClient";
+//import { WebRequest, WebResponse } from "azure-actions-webclient/lib/webClient"
 import { AzureKeyVaultSecret } from "./KeyVaultHelper";
 import { KeyVaultDNSHelper } from './KeyVaultDNSHelper';
-import * as io from "@actions/io";
 
-export class KeyVaultClient extends ServiceClient {    
+import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
+import { WebRequest, WebResponse } from 'azure-actions-webclient/WebClient';
+import { ServiceClient as AzureRestClient, ToError, AzureError, ApiCallback, ApiResult } from 'azure-actions-webclient/AzureRestClient'
+
+export class KeyVaultClient extends AzureRestClient {    
     private keyVaultUrl: string;
     private apiVersion: string = "7.0";
     private tokenArgs: string[] = ["--resource", "https://vault.azure.net"];
     
-    constructor(endpoint: IAuthorizationHandler, timeOut: number, keyVaultUrl: string) {
+    constructor(endpoint: IAuthorizer, timeOut: number, keyVaultUrl: string) {
         super(endpoint, timeOut);
         this.keyVaultUrl = keyVaultUrl;
         console.log("Url: " + this.keyVaultUrl);
+        var keyvaultDns = endpoint.getCloudSuffixUrl("keyvaultDns").substring(1);
+        this.tokenArgs[1] = "https://" + keyvaultDns;
+        console.log("token arg: " + this.tokenArgs[1]);
     }
 
     public async invokeRequest(request: WebRequest): Promise<WebResponse> {
-        KeyVaultDNSHelper.getBaseUrl().then(dnsSuffix => {
-            this.tokenArgs[1] = "https://" + dnsSuffix.substring(1);
-            console.log("vault dns: " + "https://" + dnsSuffix.substring(1));
-            console.log("arg1: " + this.tokenArgs[0]);
-            console.log("arg2: " + this.tokenArgs[1]);
-        });
         try {
             var response = await this.beginRequest(request, this.tokenArgs);
             return response;
